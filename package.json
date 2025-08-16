@@ -1,0 +1,30 @@
+{
+  "name": "robin-assistant",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "dev:web": "turbo run dev --filter=@robin/web",
+    "dev:desktop": "turbo run dev --filter=@robin/desktop",
+    "build:web": "turbo run build --filter=@robin/web",
+    "build:desktop": "turbo run build --filter=@robin/desktop",
+    "build:ui": "turbo run build --filter=@robin/ui",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "turbo": "^1.13.4",
+    "@types/node": "^20.14.10",
+    "typescript": "^5.5.3"
+  },
+  "packageManager": "npm@10.8.1",
+  "engines": {
+    "node": ">=18"
+  }
+}
