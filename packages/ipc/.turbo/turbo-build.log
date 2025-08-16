@@ -10,25 +10,25 @@
 [34mCLI[39m Cleaning output folder
 [34mCJS[39m Build start
 [34mESM[39m Build start
-[32mESM[39m [1mdist\main\index.mjs         [22m[32m1.87 KB[39m
-[32mESM[39m [1mdist\index.mjs              [22m[32m1.98 KB[39m
+[32mCJS[39m [1mdist\index.js              [22m[32m4.82 KB[39m
+[32mCJS[39m [1mdist\renderer\index.js     [22m[32m3.74 KB[39m
+[32mCJS[39m [1mdist\main\index.js         [22m[32m2.94 KB[39m
+[32mCJS[39m [1mdist\renderer\index.js.map [22m[32m5.74 KB[39m
+[32mCJS[39m [1mdist\index.js.map          [22m[32m9.34 KB[39m
+[32mCJS[39m [1mdist\main\index.js.map     [22m[32m3.84 KB[39m
+[32mCJS[39m ⚡️ Build success in 19ms
+[32mESM[39m [1mdist\index.mjs              [22m[32m3.00 KB[39m
 [32mESM[39m [1mdist\renderer\index.mjs     [22m[32m2.63 KB[39m
+[32mESM[39m [1mdist\main\index.mjs         [22m[32m1.87 KB[39m
+[32mESM[39m [1mdist\index.mjs.map          [22m[32m9.02 KB[39m
 [32mESM[39m [1mdist\main\index.mjs.map     [22m[32m3.78 KB[39m
 [32mESM[39m [1mdist\renderer\index.mjs.map [22m[32m5.68 KB[39m
-[32mESM[39m [1mdist\index.mjs.map          [22m[32m7.07 KB[39m
-[32mESM[39m ⚡️ Build success in 31ms
-[32mCJS[39m [1mdist\index.js              [22m[32m3.77 KB[39m
-[32mCJS[39m [1mdist\main\index.js         [22m[32m2.94 KB[39m
-[32mCJS[39m [1mdist\renderer\index.js     [22m[32m3.74 KB[39m
-[32mCJS[39m [1mdist\renderer\index.js.map [22m[32m5.74 KB[39m
-[32mCJS[39m [1mdist\index.js.map          [22m[32m7.39 KB[39m
-[32mCJS[39m [1mdist\main\index.js.map     [22m[32m3.84 KB[39m
-[32mCJS[39m ⚡️ Build success in 32ms
+[32mESM[39m ⚡️ Build success in 19ms
 [34mDTS[39m Build start
-[32mDTS[39m ⚡️ Build success in 2883ms
+[32mDTS[39m ⚡️ Build success in 2672ms
 [32mDTS[39m [1mdist\main\index.d.ts      [22m[32m946.00 B[39m
 [32mDTS[39m [1mdist\renderer\index.d.ts  [22m[32m1.65 KB[39m
-[32mDTS[39m [1mdist\index.d.ts           [22m[32m11.90 KB[39m
+[32mDTS[39m [1mdist\index.d.ts           [22m[32m13.31 KB[39m
 [32mDTS[39m [1mdist\main\index.d.mts     [22m[32m947.00 B[39m
 [32mDTS[39m [1mdist\renderer\index.d.mts [22m[32m1.65 KB[39m
-[32mDTS[39m [1mdist\index.d.mts          [22m[32m11.90 KB[39m
+[32mDTS[39m [1mdist\index.d.mts          [22m[32m13.31 KB[39m

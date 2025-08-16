@@ -11,6 +11,80 @@ import type {
   Point
 } from '@robin/core';
 
+// IPC Request/Response types
+export interface IPCRequest<T = any> {
+  id: string;
+  timestamp: number;
+  data?: T;
+}
+
+export interface IPCResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  timestamp: number;
+}
+
+// IPC Channel enum
+export enum IPCChannel {
+  // Agent control
+  AGENT_START = 'agent:start',
+  AGENT_PAUSE = 'agent:pause',
+  AGENT_RESUME = 'agent:resume',
+  AGENT_STOP = 'agent:stop',
+  AGENT_STATUS = 'agent:status',
+
+  // Screenshot
+  SCREENSHOT_TAKE = 'screenshot:take',
+  SCREENSHOT_REGION = 'screenshot:region',
+
+  // Settings
+  SETTINGS_GET = 'settings:get',
+  SETTINGS_SET = 'settings:set',
+  SETTINGS_RESET = 'settings:reset',
+
+  // Sessions
+  SESSION_CREATE = 'session:create',
+  SESSION_GET = 'session:get',
+  SESSION_LIST = 'session:list',
+  SESSION_DELETE = 'session:delete',
+
+  // System
+  SYSTEM_INFO = 'system:info',
+  APP_VERSION = 'app:version',
+
+  // Window
+  WINDOW_MINIMIZE = 'window:minimize',
+  WINDOW_MAXIMIZE = 'window:maximize',
+  WINDOW_CLOSE = 'window:close'
+}
+
+// Request types
+export interface AgentStartRequest {
+  agentType: string;
+  instruction: string;
+  config?: any;
+}
+
+export interface AgentControlRequest {
+  agentId: string;
+}
+
+export interface SettingsRequest {
+  category?: string;
+  settings?: any;
+}
+
+export interface ScreenshotRequest {
+  options?: any;
+  region?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+}
+
 // Zod schemas for runtime validation
 export const PointSchema = z.object({
   x: z.number(),
