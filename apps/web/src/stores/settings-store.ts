@@ -41,18 +41,75 @@ export interface AppSettings {
   debugMode: boolean;
 }
 
+// Extended settings interfaces for the new settings page
+export interface ExtendedModelSettings {
+  provider?: ModelProvider | string;
+  apiKey?: string;
+  baseUrl?: string;
+  modelName?: string;
+  name?: string;
+  temperature?: number;
+  maxTokens?: number;
+}
+
+export interface AgentSettings {
+  maxIterations?: number;
+  iterationDelay?: number;
+  autoScreenshot?: boolean;
+  confirmActions?: boolean;
+  debugMode?: boolean;
+}
+
+export interface AppearanceSettings {
+  theme?: 'light' | 'dark' | 'system';
+  language?: string;
+  animations?: boolean;
+  compactMode?: boolean;
+}
+
+export interface SecuritySettings {
+  encryptLocalData?: boolean;
+  autoLock?: boolean;
+  telemetry?: boolean;
+}
+
+export interface AdvancedSettings {
+  logLevel?: 'error' | 'warn' | 'info' | 'debug';
+  maxConcurrentAgents?: number;
+  developerMode?: boolean;
+  experimentalFeatures?: boolean;
+}
+
+export interface Settings {
+  model?: ExtendedModelSettings;
+  agent?: AgentSettings;
+  appearance?: AppearanceSettings;
+  security?: SecuritySettings;
+  advanced?: AdvancedSettings;
+  apiKeys?: Record<string, string>;
+}
+
 export interface SettingsStore {
-  // Settings
+  // Legacy settings (for backward compatibility)
   modelSettings: ModelSettings;
   operatorSettings: OperatorSettings;
   appSettings: AppSettings;
-  
-  // Actions
+
+  // New unified settings
+  settings: Settings;
+
+  // Legacy actions
   updateModelSettings: (settings: Partial<ModelSettings>) => void;
   updateOperatorSettings: (settings: Partial<OperatorSettings>) => void;
   updateAppSettings: (settings: Partial<AppSettings>) => void;
   resetToDefaults: () => void;
-  
+
+  // New settings actions
+  updateSettings: (newSettings: Partial<Settings>) => void;
+  testConnection: (providerId: string) => Promise<boolean>;
+  exportSettings: () => void;
+  importSettings: (settings: Settings) => void;
+
   // Getters
   getAgentConfig: () => any;
 }
@@ -83,6 +140,43 @@ const defaultAppSettings: AppSettings = {
   debugMode: false
 };
 
+// New unified default settings
+const defaultSettings: Settings = {
+  model: {
+    provider: ModelProvider.ANTHROPIC,
+    apiKey: '',
+    baseUrl: '',
+    modelName: 'claude-3-5-sonnet-20241022',
+    temperature: 0.7,
+    maxTokens: 4000
+  },
+  agent: {
+    maxIterations: 10,
+    iterationDelay: 1000,
+    autoScreenshot: true,
+    confirmActions: false,
+    debugMode: false
+  },
+  appearance: {
+    theme: 'system',
+    language: 'en',
+    animations: true,
+    compactMode: false
+  },
+  security: {
+    encryptLocalData: true,
+    autoLock: false,
+    telemetry: false
+  },
+  advanced: {
+    logLevel: 'info',
+    maxConcurrentAgents: 3,
+    developerMode: false,
+    experimentalFeatures: false
+  },
+  apiKeys: {}
+};
+
 export const useSettingsStore = create<SettingsStore>()(
   persist(
     (set, get) => ({
@@ -90,8 +184,9 @@ export const useSettingsStore = create<SettingsStore>()(
       modelSettings: defaultModelSettings,
       operatorSettings: defaultOperatorSettings,
       appSettings: defaultAppSettings,
+      settings: defaultSettings,
 
-      // Actions
+      // Legacy actions
       updateModelSettings: (settings: Partial<ModelSettings>) => {
         set(state => ({
           modelSettings: { ...state.modelSettings, ...settings }
@@ -114,8 +209,68 @@ export const useSettingsStore = create<SettingsStore>()(
         set({
           modelSettings: defaultModelSettings,
           operatorSettings: defaultOperatorSettings,
-          appSettings: defaultAppSettings
+          appSettings: defaultAppSettings,
+          settings: defaultSettings
         });
+      },
+
+      // New settings actions
+      updateSettings: (newSettings: Partial<Settings>) => {
+        set(state => ({
+          settings: { ...state.settings, ...newSettings }
+        }));
+      },
+
+      testConnection: async (providerId: string) => {
+        const { settings } = get();
+        const apiKey = settings.apiKeys?.[providerId];
+
+        if (!apiKey && providerId !== 'ollama') {
+          return false;
+        }
+
+        try {
+          // Mock API test - in real implementation, this would test the actual API
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          // Simulate different success rates for demo
+          const successRate = providerId === 'ollama' ? 0.7 : 0.9;
+          return Math.random() < successRate;
+        } catch (error) {
+          console.error('Connection test failed:', error);
+          return false;
+        }
+      },
+
+      exportSettings: () => {
+        const { settings } = get();
+        const sanitizedSettings = { ...settings };
+
+        // Remove sensitive data
+        if (sanitizedSettings.apiKeys) {
+          sanitizedSettings.apiKeys = Object.keys(sanitizedSettings.apiKeys).reduce((acc, key) => {
+            acc[key] = '[REDACTED]';
+            return acc;
+          }, {} as Record<string, string>);
+        }
+
+        const dataStr = JSON.stringify(sanitizedSettings, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `robin-settings-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      },
+
+      importSettings: (newSettings: Settings) => {
+        set(state => ({
+          settings: { ...state.settings, ...newSettings }
+        }));
       },
 
       // Getters
