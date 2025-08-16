@@ -14,6 +14,8 @@
     "build:web": "turbo run build --filter=@robin/web",
     "build:desktop": "turbo run build --filter=@robin/desktop",
     "build:ui": "turbo run build --filter=@robin/ui",
+    "build:core": "turbo run build --filter=@robin/core",
+    "build:ipc": "turbo run build --filter=@robin/ipc",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "clean": "turbo run clean"

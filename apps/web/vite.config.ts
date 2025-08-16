@@ -9,5 +9,23 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    rollupOptions: {
+      external: [
+        'node-screenshots',
+        'robotjs',
+        'puppeteer',
+        'puppeteer-core',
+        'child_process',
+        'fs',
+        'path',
+        'os'
+      ]
+    }
   },
+  define: {
+    global: 'globalThis',
+  },
+  optimizeDeps: {
+    exclude: ['@robin/core']
+  }
 })

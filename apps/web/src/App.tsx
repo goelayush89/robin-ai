@@ -1,22 +1,25 @@
-import { Button } from '@robin/ui'
+
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { MainLayout } from './components/layout/main-layout';
+import { Dashboard } from './pages/dashboard';
+import { ChatPage } from './pages/chat';
 
 function App() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="max-w-md mx-auto text-center space-y-6">
-        <h1 className="text-4xl font-bold text-foreground">
-          Robin Assistant
-        </h1>
-        <p className="text-muted-foreground">
-          A minimal Electron + React + TypeScript + Vite + Radix UI application
-        </p>
-        <div className="space-x-4">
-          <Button>Primary Button</Button>
-          <Button variant="outline">Outline Button</Button>
-        </div>
-      </div>
-    </div>
-  )
+    <Router>
+      <MainLayout>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/local" element={<ChatPage />} />
+          <Route path="/browser" element={<ChatPage />} />
+          <Route path="/hybrid" element={<ChatPage />} />
+          <Route path="/chat" element={<ChatPage />} />
+          <Route path="/history" element={<div className="p-6">History page coming soon...</div>} />
+          <Route path="/settings" element={<div className="p-6">Settings page coming soon...</div>} />
+        </Routes>
+      </MainLayout>
+    </Router>
+  );
 }
 
-export default App
+export default App;

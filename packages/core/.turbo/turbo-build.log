@@ -1,0 +1,46 @@
+
+> @robin/core@0.1.0 build
+> tsup
+
+[34mCLI[39m Building entry: {"index":"src/index.ts","agents/index":"src/agents/index.ts","operators/index":"src/operators/index.ts","models/index":"src/models/index.ts","types/index":"src/types/index.ts"}
+[34mCLI[39m Using tsconfig: tsconfig.json
+[34mCLI[39m tsup v8.5.0
+[34mCLI[39m Using tsup config: C:\Users\Ayush Goel\Desktop\robin-assistant\packages\core\tsup.config.ts
+[34mCLI[39m Target: es2022
+[34mCLI[39m Cleaning output folder
+[34mCJS[39m Build start
+[34mESM[39m Build start
+[32mESM[39m [1mdist\index.mjs               [22m[32m107.00 KB[39m
+[32mESM[39m [1mdist\agents\index.mjs        [22m[32m105.00 KB[39m
+[32mESM[39m [1mdist\models\index.mjs        [22m[32m32.18 KB[39m
+[32mESM[39m [1mdist\types\index.mjs         [22m[32m2.50 KB[39m
+[32mESM[39m [1mdist\operators\index.mjs     [22m[32m32.81 KB[39m
+[32mESM[39m [1mdist\agents\index.mjs.map    [22m[32m199.33 KB[39m
+[32mESM[39m [1mdist\index.mjs.map           [22m[32m200.51 KB[39m
+[32mESM[39m [1mdist\types\index.mjs.map     [22m[32m6.73 KB[39m
+[32mESM[39m [1mdist\operators\index.mjs.map [22m[32m67.38 KB[39m
+[32mESM[39m [1mdist\models\index.mjs.map    [22m[32m63.41 KB[39m
+[32mESM[39m ⚡️ Build success in 58ms
+[32mCJS[39m [1mdist\agents\index.js        [22m[32m106.40 KB[39m
+[32mCJS[39m [1mdist\index.js               [22m[32m109.06 KB[39m
+[32mCJS[39m [1mdist\models\index.js        [22m[32m33.35 KB[39m
+[32mCJS[39m [1mdist\operators\index.js     [22m[32m34.20 KB[39m
+[32mCJS[39m [1mdist\types\index.js         [22m[32m3.76 KB[39m
+[32mCJS[39m [1mdist\index.js.map           [22m[32m200.63 KB[39m
+[32mCJS[39m [1mdist\models\index.js.map    [22m[32m63.83 KB[39m
+[32mCJS[39m [1mdist\agents\index.js.map    [22m[32m199.71 KB[39m
+[32mCJS[39m [1mdist\operators\index.js.map [22m[32m67.80 KB[39m
+[32mCJS[39m [1mdist\types\index.js.map     [22m[32m6.82 KB[39m
+[32mCJS[39m ⚡️ Build success in 59ms
+[34mDTS[39m Build start
+[32mDTS[39m ⚡️ Build success in 2835ms
+[32mDTS[39m [1mdist\index.d.ts            [22m[32m955.00 B[39m
+[32mDTS[39m [1mdist\types\index.d.ts      [22m[32m5.28 KB[39m
+[32mDTS[39m [1mdist\agents\index.d.ts     [22m[32m5.26 KB[39m
+[32mDTS[39m [1mdist\operators\index.d.ts  [22m[32m4.53 KB[39m
+[32mDTS[39m [1mdist\models\index.d.ts     [22m[32m5.04 KB[39m
+[32mDTS[39m [1mdist\index.d.mts           [22m[32m959.00 B[39m
+[32mDTS[39m [1mdist\types\index.d.mts     [22m[32m5.28 KB[39m
+[32mDTS[39m [1mdist\agents\index.d.mts    [22m[32m5.26 KB[39m
+[32mDTS[39m [1mdist\operators\index.d.mts [22m[32m4.53 KB[39m
+[32mDTS[39m [1mdist\models\index.d.mts    [22m[32m5.04 KB[39m

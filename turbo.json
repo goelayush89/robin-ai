@@ -18,6 +18,25 @@
     },
     "clean": {
       "cache": false
+    },
+    "@robin/core#build": {
+      "outputs": ["dist/**"]
+    },
+    "@robin/ipc#build": {
+      "dependsOn": ["@robin/core#build"],
+      "outputs": ["dist/**"]
+    },
+    "@robin/ui#build": {
+      "dependsOn": ["@robin/core#build"],
+      "outputs": ["dist/**"]
+    },
+    "@robin/web#build": {
+      "dependsOn": ["@robin/core#build", "@robin/ipc#build", "@robin/ui#build"],
+      "outputs": ["dist/**"]
+    },
+    "@robin/desktop#build": {
+      "dependsOn": ["@robin/core#build", "@robin/ipc#build"],
+      "outputs": ["dist/**"]
     }
   }
 }

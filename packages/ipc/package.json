@@ -1,0 +1,50 @@
+{
+  "name": "@robin/ipc",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Type-safe IPC communication for Robin Assistant",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./main": {
+      "types": "./dist/main/index.d.ts",
+      "import": "./dist/main/index.mjs",
+      "require": "./dist/main/index.js"
+    },
+    "./renderer": {
+      "types": "./dist/renderer/index.d.ts",
+      "import": "./dist/renderer/index.mjs",
+      "require": "./dist/renderer/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@robin/core": "*",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@robin/tsconfig": "*",
+    "@types/node": "^20.14.10",
+    "electron": "^31.3.1",
+    "tsup": "^8.0.2",
+    "typescript": "^5.5.3"
+  },
+  "peerDependencies": {
+    "electron": ">=26.0.0"
+  },
+  "files": [
+    "dist",
+    "src"
+  ]
+}
