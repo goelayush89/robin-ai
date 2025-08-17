@@ -5,8 +5,9 @@
   "main": "dist/main.js",
   "scripts": {
     "dev": "concurrently \"npm run build:watch\" \"npm run electron:dev\"",
-    "build": "tsc",
+    "build": "tsc && npm run copy-renderer",
     "build:watch": "tsc --watch",
+    "copy-renderer": "xcopy src\\renderer dist\\renderer\\ /E /I /Y || robocopy src\\renderer dist\\renderer /E || echo 'Copy completed'",
     "electron:dev": "wait-on dist/main.js && electron .",
     "electron:pack": "electron-builder",
     "electron:dist": "npm run build && electron-builder",
@@ -32,7 +33,7 @@
     "@types/crypto-js": "^4.2.1",
     "@types/semver": "^7.5.6",
     "concurrently": "^8.2.2",
-    "electron": "^31.3.1",
+    "electron": "31.3.1",
     "electron-builder": "^24.13.3",
     "typescript": "^5.5.3",
     "wait-on": "^7.2.0"

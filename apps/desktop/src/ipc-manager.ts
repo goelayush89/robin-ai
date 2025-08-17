@@ -3,6 +3,7 @@ import log from 'electron-log';
 import { AgentManager } from './agent-manager';
 import { SettingsManager } from './settings-manager';
 import { WindowManager } from './window-manager';
+import { screenshotService } from './screenshot-service';
 import { 
   IPCRequest, 
   IPCResponse, 
@@ -41,6 +42,7 @@ export class IPCManager {
     // Screenshot handlers
     ipcMain.handle(IPCChannel.SCREENSHOT_TAKE, this.handleTakeScreenshot.bind(this));
     ipcMain.handle(IPCChannel.SCREENSHOT_REGION, this.handleTakeRegionScreenshot.bind(this));
+    ipcMain.handle(IPCChannel.SCREENSHOT_GET_SCREEN_INFO, this.handleGetScreenInfo.bind(this));
 
     // Settings handlers
     ipcMain.handle(IPCChannel.SETTINGS_GET, this.handleGetSettings.bind(this));
@@ -204,12 +206,18 @@ export class IPCManager {
     request: IPCRequest<ScreenshotRequest>
   ): Promise<IPCResponse> {
     try {
-      const screenshot = await this.agentManager.takeScreenshot(request.data || {});
-      return {
-        success: true,
-        data: screenshot,
-        timestamp: Date.now()
-      };
+      log.info('Taking screenshot via screenshot service...');
+      const result = await screenshotService.takeScreenshot(request.data || {});
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data,
+          timestamp: Date.now()
+        };
+      } else {
+        throw new Error(result.error || 'Screenshot failed');
+      }
     } catch (error) {
       log.error('Failed to take screenshot:', error);
       return {
@@ -225,14 +233,53 @@ export class IPCManager {
     request: IPCRequest<ScreenshotRequest>
   ): Promise<IPCResponse> {
     try {
-      const screenshot = await this.agentManager.takeRegionScreenshot(request.data || {});
-      return {
-        success: true,
-        data: screenshot,
-        timestamp: Date.now()
-      };
+      log.info('Taking region screenshot via screenshot service...');
+
+      const region = request.data?.region;
+      if (!region) {
+        throw new Error('Region coordinates are required for region screenshot');
+      }
+
+      const result = await screenshotService.takeRegionScreenshot(region);
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data,
+          timestamp: Date.now()
+        };
+      } else {
+        throw new Error(result.error || 'Region screenshot failed');
+      }
     } catch (error) {
       log.error('Failed to take region screenshot:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        timestamp: Date.now()
+      };
+    }
+  }
+
+  private async handleGetScreenInfo(
+    event: IpcMainInvokeEvent,
+    request?: IPCRequest<any>
+  ): Promise<IPCResponse> {
+    try {
+      log.info('Getting screen info via screenshot service...');
+      const result = await screenshotService.getScreenInfo();
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result,
+          timestamp: Date.now()
+        };
+      } else {
+        throw new Error(result.error || 'Failed to get screen info');
+      }
+    } catch (error) {
+      log.error('Failed to get screen info:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : String(error),

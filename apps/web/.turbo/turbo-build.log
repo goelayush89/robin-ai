@@ -4,10 +4,18 @@
 
 [36mvite v5.4.19 [32mbuilding for production...[36m[39m
 transforming...
-[32m✓[39m 1666 modules transformed.
+[32m✓[39m 1696 modules transformed.
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) C:/Users/Ayush Goel/Desktop/robin-assistant/apps/web/src/services/browser-screen-capture.ts is dynamically imported by C:/Users/Ayush Goel/Desktop/robin-assistant/apps/web/src/services/electron-screen-capture.ts but also statically imported by C:/Users/Ayush Goel/Desktop/robin-assistant/apps/web/src/components/screen-capture/screen-capture-setup.tsx, C:/Users/Ayush Goel/Desktop/robin-assistant/apps/web/src/pages/chat.tsx, dynamic import will not move module into another chunk.
 rendering chunks...
+[39m
 computing gzip size...
 [2mdist/[22m[32mindex.html                 [39m[1m[2m  0.46 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
-[2mdist/[22m[35massets/index-ZDu_x9r6.css  [39m[1m[2m 19.61 kB[22m[1m[22m[2m │ gzip:   4.49 kB[22m
-[2mdist/[22m[36massets/index-CqhUQiL8.js   [39m[1m[2m321.64 kB[22m[1m[22m[2m │ gzip: 102.52 kB[22m
-[32m✓ built in 2.42s[39m
+[33m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+[2mdist/[22m[35massets/index-BQGfYbpy.css  [39m[1m[2m 31.35 kB[22m[1m[22m[2m │ gzip:   6.12 kB[22m
+- Using dynamic import() to code-split the application
+[2mdist/[22m[36massets/index-BswiBqBw.js   [39m[1m[33m513.89 kB[39m[22m[2m │ gzip: 147.90 kB[22m
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 3.44s[39m

@@ -74,18 +74,27 @@ const store = new Store<Record<string, any>>({
 
 async function initializeApp(): Promise<void> {
   try {
+    console.log('🚀 Initializing Robin Assistant...');
     log.info('Initializing Robin Assistant...');
 
     // Get machine ID for security
     appState.machineId = await machineId();
+    console.log('Machine ID obtained:', appState.machineId);
 
     // Initialize managers
+    console.log('Initializing managers...');
     securityManager = new SecurityManager(appState.machineId);
+    console.log('SecurityManager initialized');
     settingsManager = new SettingsManager(store, securityManager);
+    console.log('SettingsManager initialized');
     windowManager = new WindowManager(store, settingsManager);
+    console.log('WindowManager initialized');
     agentManager = new AgentManager(settingsManager);
+    console.log('AgentManager initialized');
     ipcManager = new IPCManager(agentManager, settingsManager, windowManager);
+    console.log('IPCManager initialized');
     updateManager = new UpdateManager();
+    console.log('UpdateManager initialized');
 
     // Setup global shortcuts
     setupGlobalShortcuts();

@@ -96,14 +96,24 @@ export class InputOperator extends BaseOperator {
 
   protected async onInitialize(config: Record<string, any>): Promise<void> {
     try {
-      // Try to import robotjs for native input control
-      try {
-        this.robotjs = await import('robotjs' as any).catch(() => null);
-        this.robotjs.setXDisplayName(process.env.DISPLAY || ':0');
-        this._isInitialized = true;
-        this.log('info', 'Input operator initialized with robotjs');
-      } catch (error) {
-        this.log('warn', 'robotjs not available, using fallback methods');
+      // Try to import robotjs for native input control - only in Node.js environment
+      if (typeof process !== 'undefined' && typeof window === 'undefined') {
+        try {
+          // Use string concatenation to avoid Vite static analysis
+          const packageName = 'robot' + 'js';
+          this.robotjs = await import(packageName).catch(() => null);
+          if (this.robotjs && typeof process !== 'undefined' && process.env) {
+            this.robotjs.setXDisplayName(process.env.DISPLAY || ':0');
+          }
+          this._isInitialized = true;
+          this.log('info', 'Input operator initialized with robotjs');
+        } catch (error) {
+          this.log('warn', 'robotjs not available, using fallback methods');
+          this._isInitialized = true;
+        }
+      } else {
+        // Browser environment - robotjs not available
+        this.log('info', 'Input operator initialized for browser environment (robotjs not available)');
         this._isInitialized = true;
       }
     } catch (error) {
@@ -153,6 +163,117 @@ export class InputOperator extends BaseOperator {
     this.robotjs = undefined;
     this._isInitialized = false;
     this.log('info', 'Input operator cleaned up');
+  }
+
+  // Public methods for ActionExecutor
+  async click(x: number, y: number, button: string = 'left'): Promise<void> {
+    if (!this.validatePoint({ x, y })) {
+      throw new OperatorError('Invalid click coordinates');
+    }
+
+    if (this.robotjs) {
+      this.robotjs.moveMouse(x, y);
+      this.robotjs.mouseClick(button);
+    } else {
+      await this.clickFallback(x, y, button);
+    }
+
+    this.log('info', 'Click executed', { x, y, button });
+  }
+
+  async doubleClick(x: number, y: number): Promise<void> {
+    if (!this.validatePoint({ x, y })) {
+      throw new OperatorError('Invalid double-click coordinates');
+    }
+
+    if (this.robotjs) {
+      this.robotjs.moveMouse(x, y);
+      this.robotjs.mouseClick('left', true); // true for double-click
+    } else {
+      await this.doubleClickFallback(x, y);
+    }
+
+    this.log('info', 'Double-click executed', { x, y });
+  }
+
+  async rightClick(x: number, y: number): Promise<void> {
+    if (!this.validatePoint({ x, y })) {
+      throw new OperatorError('Invalid right-click coordinates');
+    }
+
+    if (this.robotjs) {
+      this.robotjs.moveMouse(x, y);
+      this.robotjs.mouseClick('right');
+    } else {
+      await this.rightClickFallback(x, y);
+    }
+
+    this.log('info', 'Right-click executed', { x, y });
+  }
+
+  async typeText(text: string): Promise<void> {
+    if (!text) {
+      throw new OperatorError('Text is required for typing');
+    }
+
+    if (this.robotjs) {
+      this.robotjs.typeString(text);
+    } else {
+      await this.typeFallback(text);
+    }
+
+    this.log('info', 'Text typed', { text: text.substring(0, 50) + (text.length > 50 ? '...' : '') });
+  }
+
+  async key(key: string, modifiers: string[] = []): Promise<void> {
+    if (!key) {
+      throw new OperatorError('Key is required');
+    }
+
+    if (this.robotjs) {
+      if (modifiers.length > 0) {
+        this.robotjs.keyTap(key, modifiers);
+      } else {
+        this.robotjs.keyTap(key);
+      }
+    } else {
+      await this.keyFallback(key, modifiers);
+    }
+
+    this.log('info', 'Key pressed', { key, modifiers });
+  }
+
+  async scroll(x: number, y: number, direction: string, clicks: number = 3): Promise<void> {
+    if (!this.validatePoint({ x, y })) {
+      throw new OperatorError('Invalid scroll coordinates');
+    }
+
+    if (this.robotjs) {
+      this.robotjs.moveMouse(x, y);
+      const scrollDirection = direction === 'up' ? 'up' : 'down';
+      this.robotjs.scrollMouse(clicks, scrollDirection);
+    } else {
+      await this.scrollFallback(x, y, direction, clicks);
+    }
+
+    this.log('info', 'Scroll executed', { x, y, direction, clicks });
+  }
+
+  async drag(fromX: number, fromY: number, toX: number, toY: number): Promise<void> {
+    if (!this.validatePoint({ x: fromX, y: fromY }) || !this.validatePoint({ x: toX, y: toY })) {
+      throw new OperatorError('Invalid drag coordinates');
+    }
+
+    if (this.robotjs) {
+      this.robotjs.moveMouse(fromX, fromY);
+      this.robotjs.mouseToggle('down');
+      this.robotjs.dragMouse(toX, toY);
+      this.robotjs.mouseToggle('up');
+    } else {
+      await this.dragFallback(fromX, fromY, toX, toY);
+    }
+
+    this.log('info', 'Drag executed', { fromX, fromY, toX, toY });
   }
 
   private async handleClick(action: Action): Promise<ActionResult> {
@@ -301,6 +422,11 @@ export class InputOperator extends BaseOperator {
 
   // Fallback methods for when robotjs is not available
   private async clickFallback(x: number, y: number, button: string): Promise<void> {
+    // Only available in Node.js environment
+    if (typeof window !== 'undefined' || typeof process === 'undefined') {
+      throw new OperatorError('Click fallback not available in browser environment');
+    }
+
     // Platform-specific fallback implementations
     if (process.platform === 'win32') {
       await this.executeCommand('powershell', [
@@ -324,6 +450,10 @@ export class InputOperator extends BaseOperator {
   }
 
   private async rightClickFallback(x: number, y: number): Promise<void> {
+    if (typeof window !== 'undefined' || typeof process === 'undefined') {
+      throw new OperatorError('Right-click fallback not available in browser environment');
+    }
+
     if (process.platform === 'linux') {
       await this.executeCommand('xdotool', ['mousemove', x.toString(), y.toString(), 'click', '3']);
     } else {
@@ -332,6 +462,10 @@ export class InputOperator extends BaseOperator {
   }
 
   private async dragFallback(fromX: number, fromY: number, toX: number, toY: number): Promise<void> {
+    if (typeof window !== 'undefined' || typeof process === 'undefined') {
+      throw new OperatorError('Drag fallback not available in browser environment');
+    }
+
     if (process.platform === 'linux') {
       await this.executeCommand('xdotool', [
         'mousemove', fromX.toString(), fromY.toString(),
@@ -343,6 +477,10 @@ export class InputOperator extends BaseOperator {
   }
 
   private async typeFallback(text: string): Promise<void> {
+    if (typeof window !== 'undefined' || typeof process === 'undefined') {
+      throw new OperatorError('Type fallback not available in browser environment');
+    }
+
     if (process.platform === 'linux') {
       await this.executeCommand('xdotool', ['type', text]);
     } else if (process.platform === 'darwin') {
@@ -351,6 +489,10 @@ export class InputOperator extends BaseOperator {
   }
 
   private async keyFallback(key: string, modifiers: string[]): Promise<void> {
+    if (typeof window !== 'undefined' || typeof process === 'undefined') {
+      throw new OperatorError('Key fallback not available in browser environment');
+    }
+
     if (process.platform === 'linux') {
       const args = ['key'];
       if (modifiers.length > 0) {
@@ -363,6 +505,10 @@ export class InputOperator extends BaseOperator {
   }
 
   private async scrollFallback(x: number, y: number, direction: string, clicks: number): Promise<void> {
+    if (typeof window !== 'undefined' || typeof process === 'undefined') {
+      throw new OperatorError('Scroll fallback not available in browser environment');
+    }
+
     if (process.platform === 'linux') {
       const button = direction === 'up' ? '4' : '5';
       for (let i = 0; i < clicks; i++) {
@@ -372,19 +518,29 @@ export class InputOperator extends BaseOperator {
   }
 
   private async executeCommand(command: string, args: string[]): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const { spawn } = require('child_process');
-      const process = spawn(command, args);
-      
-      process.on('close', (code: number) => {
-        if (code === 0) {
-          resolve();
-        } else {
-          reject(new Error(`Command failed with code ${code}`));
-        }
-      });
-      
-      process.on('error', reject);
+    // Only available in Node.js environment
+    if (typeof window !== 'undefined') {
+      throw new OperatorError('Command execution not available in browser environment');
+    }
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const moduleName = 'child_' + 'process';
+        const { spawn } = await import(moduleName);
+        const process = spawn(command, args);
+
+        process.on('close', (code: number) => {
+          if (code === 0) {
+            resolve();
+          } else {
+            reject(new Error(`Command failed with code ${code}`));
+          }
+        });
+
+        process.on('error', reject);
+      } catch (error) {
+        reject(new OperatorError('Failed to execute command', { error }));
+      }
     });
   }
 }

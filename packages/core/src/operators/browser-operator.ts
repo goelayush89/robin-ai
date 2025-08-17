@@ -77,19 +77,31 @@ export class BrowserOperator extends BaseOperator {
 
   protected async onInitialize(config: Record<string, any>): Promise<void> {
     try {
-      // Try to import puppeteer
+      // Only try to import puppeteer in Node.js environment
+      if (typeof window !== 'undefined') {
+        throw new OperatorError('Browser operator not available in browser environment - use native browser APIs instead');
+      }
+
+      if (typeof process === 'undefined') {
+        throw new OperatorError('Browser operator requires Node.js environment');
+      }
+
+      // Try to import puppeteer using dynamic imports to avoid Vite analysis
       try {
-        this.puppeteer = await import('puppeteer' as any).catch(() => null);
+        const puppeteerName = 'puppet' + 'eer';
+        this.puppeteer = await import(puppeteerName).catch(() => null);
         if (!this.puppeteer) {
           // Fallback to puppeteer-core
-          this.puppeteer = await import('puppeteer-core' as any).catch(() => null);
+          const puppeteerCoreName = 'puppet' + 'eer-core';
+          this.puppeteer = await import(puppeteerCoreName).catch(() => null);
         }
       } catch (error) {
+        this.log('warn', 'Failed to import puppeteer', { error });
         this.puppeteer = null;
       }
 
       if (!this.puppeteer) {
-        throw new OperatorError('Neither puppeteer nor puppeteer-core is available');
+        throw new OperatorError('Neither puppeteer nor puppeteer-core is available. Please install: npm install puppeteer');
       }
 
       // Launch browser

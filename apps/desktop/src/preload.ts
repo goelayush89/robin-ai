@@ -1,5 +1,65 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import { IPCChannel, IPCRequest, IPCResponse } from '@robin/ipc';
+
+// IPC types (standalone to avoid dependency issues)
+export interface IPCRequest<T = any> {
+  id: string;
+  timestamp: number;
+  data?: T;
+}
+
+export interface IPCResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  timestamp: number;
+}
+
+// IPC Channel enum
+export enum IPCChannel {
+  // Agent control
+  AGENT_START = 'agent:start',
+  AGENT_PAUSE = 'agent:pause',
+  AGENT_RESUME = 'agent:resume',
+  AGENT_STOP = 'agent:stop',
+  AGENT_STATUS = 'agent:status',
+
+  // Screenshot
+  SCREENSHOT_TAKE = 'screenshot:take',
+  SCREENSHOT_REGION = 'screenshot:region',
+  SCREENSHOT_GET_SCREEN_INFO = 'screenshot:getScreenInfo',
+
+  // Settings
+  SETTINGS_GET = 'settings:get',
+  SETTINGS_SET = 'settings:set',
+  SETTINGS_RESET = 'settings:reset',
+
+  // Sessions
+  SESSION_CREATE = 'session:create',
+  SESSION_GET = 'session:get',
+  SESSION_LIST = 'session:list',
+  SESSION_DELETE = 'session:delete',
+
+  // System
+  SYSTEM_INFO = 'system:info',
+  SYSTEM_PERMISSIONS = 'system:permissions',
+
+  // Updates
+  UPDATE_CHECK = 'update:check',
+  UPDATE_DOWNLOAD = 'update:download',
+  UPDATE_INSTALL = 'update:install',
+
+  // Notifications
+  NOTIFICATION_SHOW = 'notification:show',
+  NOTIFICATION_CLEAR = 'notification:clear',
+
+  // App
+  APP_VERSION = 'app:version',
+
+  // Window
+  WINDOW_MINIMIZE = 'window:minimize',
+  WINDOW_MAXIMIZE = 'window:maximize',
+  WINDOW_CLOSE = 'window:close'
+}
 
 // Define the API that will be exposed to the renderer process
 export interface ElectronAPI {
@@ -16,6 +76,7 @@ export interface ElectronAPI {
   screenshot: {
     take: (options?: any) => Promise<IPCResponse>;
     takeRegion: (options: any) => Promise<IPCResponse>;
+    getScreenInfo: () => Promise<IPCResponse>;
   };
 
   // Settings
@@ -106,7 +167,10 @@ const electronAPI: ElectronAPI = {
       invokeIPC(IPCChannel.SCREENSHOT_TAKE, options),
 
     takeRegion: (options: any) =>
-      invokeIPC(IPCChannel.SCREENSHOT_REGION, options)
+      invokeIPC(IPCChannel.SCREENSHOT_REGION, options),
+
+    getScreenInfo: () =>
+      invokeIPC(IPCChannel.SCREENSHOT_GET_SCREEN_INFO, {})
   },
 
   // Settings methods

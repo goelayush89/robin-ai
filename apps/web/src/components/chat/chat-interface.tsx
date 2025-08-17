@@ -3,6 +3,7 @@ import { Send, Loader2, Image, Paperclip } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useAgentStore, type Message } from '../../stores/agent-store';
 import { cn, formatTimestamp } from '../../lib/utils';
+import { BrowserLimitationsBanner, QuickTestSuggestions } from './browser-limitations-banner';
 
 export function ChatInterface() {
   const [input, setInput] = useState('');
@@ -125,20 +126,19 @@ export function ChatInterface() {
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-center">
-            <div className="max-w-md">
+          <div className="max-w-4xl mx-auto">
+            <BrowserLimitationsBanner />
+            <QuickTestSuggestions />
+
+            <div className="text-center">
               <h3 className="text-lg font-semibold mb-2">Welcome to Robin Assistant</h3>
               <p className="text-muted-foreground mb-4">
-                I can help you automate tasks on your computer and web browser. 
-                Just describe what you'd like me to do!
+                I'm an AI-powered automation assistant. I can analyze your screen and help with tasks,
+                though my capabilities vary between browser and desktop environments.
               </p>
               <div className="text-sm text-muted-foreground">
-                <p>Examples:</p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>"Take a screenshot of my desktop"</li>
-                  <li>"Open Google and search for 'AI automation'"</li>
-                  <li>"Create a new document and type 'Hello World'"</li>
-                </ul>
+                <p className="font-medium">🚀 Ready to get started?</p>
+                <p className="mt-2">Try one of the suggestions above or describe what you'd like me to do!</p>
               </div>
             </div>
           </div>

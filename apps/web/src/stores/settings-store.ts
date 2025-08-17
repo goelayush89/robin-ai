@@ -112,6 +112,7 @@ export interface SettingsStore {
 
   // Getters
   getAgentConfig: () => any;
+  getWebAgentConfig: () => any;
 }
 
 const defaultModelSettings: ModelSettings = {
@@ -216,9 +217,28 @@ export const useSettingsStore = create<SettingsStore>()(
 
       // New settings actions
       updateSettings: (newSettings: Partial<Settings>) => {
-        set(state => ({
-          settings: { ...state.settings, ...newSettings }
-        }));
+        set(state => {
+          const updatedSettings = { ...state.settings, ...newSettings };
+
+          // Also save AI configuration for agent service
+          if (updatedSettings.model && updatedSettings.model.apiKey && updatedSettings.model.modelName) {
+            const aiConfig = {
+              provider: updatedSettings.model.provider || 'openai',
+              apiKey: updatedSettings.model.apiKey,
+              model: updatedSettings.model.modelName
+            };
+
+            try {
+              localStorage.setItem('robin-ai-config', JSON.stringify(aiConfig));
+            } catch (error) {
+              console.warn('Failed to save AI config:', error);
+            }
+          }
+
+          return {
+            settings: updatedSettings
+          };
+        });
       },
 
       testConnection: async (providerId: string) => {
@@ -302,6 +322,41 @@ export const useSettingsStore = create<SettingsStore>()(
             autoScreenshot: state.appSettings.autoScreenshot,
             confirmActions: state.appSettings.confirmActions,
             language: state.appSettings.language
+          }
+        };
+      },
+
+      getWebAgentConfig: () => {
+        const state = get();
+        const settings = state.settings;
+
+        return {
+          id: 'robin-web-agent',
+          name: 'Robin Assistant',
+          model: {
+            provider: settings.model?.provider || 'anthropic',
+            name: settings.model?.name || settings.model?.modelName || 'claude-3-5-sonnet-20241022',
+            modelName: settings.model?.name || settings.model?.modelName || 'claude-3-5-sonnet-20241022',
+            apiKey: settings.apiKeys?.[settings.model?.provider || 'anthropic'] || '',
+            baseUrl: settings.model?.baseUrl || (settings.model?.provider === 'openrouter' ? 'https://openrouter.ai/api/v1' : ''),
+            version: '1.0',
+            temperature: settings.model?.temperature || 0.1,
+            maxTokens: settings.model?.maxTokens || 4000
+          },
+          operator: {
+            type: 'local_computer', // Default to local computer for web interface
+            headless: false,
+            width: 1920,
+            height: 1080,
+            userAgent: navigator.userAgent,
+            settings: {}
+          },
+          settings: {
+            maxIterations: settings.agent?.maxIterations || 10,
+            iterationDelay: settings.agent?.iterationDelay || 1000,
+            autoScreenshot: settings.agent?.autoScreenshot !== false,
+            confirmActions: settings.agent?.confirmActions === true,
+            language: settings.appearance?.language || 'en'
           }
         };
       }

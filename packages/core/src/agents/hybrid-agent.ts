@@ -6,6 +6,9 @@ import type { SystemOperator } from '../operators/base-operator';
 import { OpenAIVisionModel } from '../models/openai-vision-model';
 import { AnthropicClaudeModel } from '../models/anthropic-claude-model';
 import { OpenRouterModel } from '../models/openrouter-model';
+import { AIVisionService } from '../services/ai-vision-service';
+import { ActionExecutor } from '../services/action-executor';
+import { SessionManager } from '../services/session-manager';
 import {
   AgentConfig,
   AgentCapability,
@@ -20,10 +23,13 @@ import {
 } from '../types';
 
 export class HybridAgent extends BaseAgent {
-  private screenOperator?: SystemOperator;
-  private inputOperator?: SystemOperator;
-  private browserOperator?: SystemOperator;
+  private screenOperator?: ScreenOperator;
+  private inputOperator?: InputOperator;
+  private browserOperator?: BrowserOperator;
   private model?: any; // AIModel interface
+  private aiVisionService?: AIVisionService;
+  private actionExecutor?: ActionExecutor;
+  private sessionManager?: SessionManager;
   private maxIterations = 20;
   private iterationDelay = 1500;
   private currentMode: 'desktop' | 'browser' = 'desktop';
@@ -97,11 +103,30 @@ export class HybridAgent extends BaseAgent {
       // Initialize AI model
       await this.initializeModel(config);
 
+      // Initialize AI Vision Service
+      this.aiVisionService = new AIVisionService();
+      await this.aiVisionService.initialize({
+        provider: config.model.provider,
+        apiKey: config.model.apiKey,
+        model: config.model.name,
+        maxTokens: 2000,
+        temperature: 0.1
+      });
+
+      // Initialize Action Executor with screen and input operators
+      this.actionExecutor = new ActionExecutor(
+        this.screenOperator,
+        this.inputOperator
+      );
+
+      // Initialize Session Manager
+      this.sessionManager = new SessionManager();
+
       // Set agent settings
       this.maxIterations = config.settings.maxIterations || 20;
       this.iterationDelay = config.settings.iterationDelay || 1500;
 
-      this.log('info', 'Hybrid agent initialized successfully');
+      this.log('info', 'Hybrid agent initialized successfully with full automation capabilities');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new AgentError(`Failed to initialize hybrid agent: ${errorMessage}`, { error });

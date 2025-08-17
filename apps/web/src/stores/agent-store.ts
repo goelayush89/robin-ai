@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { agentService } from '../services/agent-service';
 // Browser-compatible type definitions
 export enum AgentStatus {
   IDLE = 'idle',
@@ -200,13 +201,16 @@ export const useAgentStore = create<AgentStore>()(
       // Agent control actions
       startAgent: async (instruction: string) => {
         const state = get();
-        
+
         if (!state.agentConfig) {
           throw new Error('No agent configuration available');
         }
 
         try {
-          set({ isLoading: true, error: null });
+          set({ isLoading: true, error: null, agentStatus: AgentStatus.INITIALIZING });
+
+          // Initialize agent if not already done
+          await agentService.initializeAgent(state.agentConfig);
 
           // Create user message
           const userMessage: Message = {
@@ -218,24 +222,62 @@ export const useAgentStore = create<AgentStore>()(
 
           get().addMessage(userMessage);
 
-          // This would be replaced with actual IPC call to Electron
-          // For now, simulate the agent execution
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Set up event listeners for real-time updates
+          agentService.addEventListener('screenshot-captured', (data: any) => {
+            set({ lastScreenshot: data.screenshot });
+          });
 
-          // Create assistant response
-          const assistantMessage: Message = {
-            id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            type: MessageType.ASSISTANT,
-            content: 'I understand your request. Let me analyze the screen and execute the necessary actions.',
-            timestamp: Date.now()
-          };
+          agentService.addEventListener('analysis-completed', (data: any) => {
+            const analysisMessage: Message = {
+              id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              type: MessageType.ASSISTANT,
+              content: `Analysis: ${data.response.reasoning}`,
+              timestamp: Date.now()
+            };
+            get().addMessage(analysisMessage);
+          });
 
-          get().addMessage(assistantMessage);
+          agentService.addEventListener('action-completed', (data: any) => {
+            const actionMessage: Message = {
+              id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              type: MessageType.SYSTEM,
+              content: `Action ${data.action.type}: ${data.result.success ? 'Success' : 'Failed'}`,
+              timestamp: Date.now(),
+              actionResults: [data.result]
+            };
+            get().addMessage(actionMessage);
+          });
+
           set({ agentStatus: AgentStatus.RUNNING });
+
+          // Execute the instruction using real AI agent
+          const result = await agentService.executeInstruction(instruction);
+
+          if (result.success) {
+            const successMessage: Message = {
+              id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              type: MessageType.ASSISTANT,
+              content: `Task completed successfully! Executed ${result.results.length} actions.`,
+              timestamp: Date.now(),
+              actionResults: result.results,
+              screenshot: result.screenshots[result.screenshots.length - 1]
+            };
+            get().addMessage(successMessage);
+            set({ agentStatus: AgentStatus.IDLE });
+          } else {
+            throw new Error(result.error || 'Agent execution failed');
+          }
 
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          set({ error: errorMessage });
+          const errorMsg: Message = {
+            id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            type: MessageType.SYSTEM,
+            content: `Error: ${errorMessage}`,
+            timestamp: Date.now()
+          };
+          get().addMessage(errorMsg);
+          set({ error: errorMessage, agentStatus: AgentStatus.ERROR });
         } finally {
           set({ isLoading: false });
         }
@@ -244,8 +286,7 @@ export const useAgentStore = create<AgentStore>()(
       pauseAgent: async () => {
         try {
           set({ isLoading: true });
-          // IPC call to pause agent
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await agentService.pauseAgent();
           set({ agentStatus: AgentStatus.PAUSED });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
@@ -258,8 +299,7 @@ export const useAgentStore = create<AgentStore>()(
       resumeAgent: async () => {
         try {
           set({ isLoading: true });
-          // IPC call to resume agent
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await agentService.resumeAgent();
           set({ agentStatus: AgentStatus.RUNNING });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
@@ -272,8 +312,7 @@ export const useAgentStore = create<AgentStore>()(
       stopAgent: async () => {
         try {
           set({ isLoading: true });
-          // IPC call to stop agent
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await agentService.stopAgent();
           set({ agentStatus: AgentStatus.IDLE });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);

@@ -27,6 +27,9 @@ export interface Action {
   parameters: Record<string, any>;
   timestamp: number;
   description?: string;
+  coordinates?: { x: number; y: number };
+  text?: string;
+  reasoning?: string;
 }
 
 export enum ActionType {

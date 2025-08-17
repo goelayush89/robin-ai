@@ -37,6 +37,7 @@ export enum IPCChannel {
   // Screenshot
   SCREENSHOT_TAKE = 'screenshot:take',
   SCREENSHOT_REGION = 'screenshot:region',
+  SCREENSHOT_GET_SCREEN_INFO = 'screenshot:getScreenInfo',
 
   // Settings
   SETTINGS_GET = 'settings:get',

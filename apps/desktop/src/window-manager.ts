@@ -127,15 +127,10 @@ export class WindowManager {
       }
     });
 
-    // Load settings page
-    if (isDev) {
-      await this.settingsWindow.loadURL('http://localhost:3000/settings');
-    } else {
-      await this.settingsWindow.loadFile(
-        path.join(__dirname, '../web/dist/index.html'),
-        { hash: '/settings' }
-      );
-    }
+    // Load embedded settings page
+    await this.settingsWindow.loadFile(
+      path.join(__dirname, 'renderer/index.html')
+    );
 
     return this.settingsWindow;
   }
@@ -183,14 +178,10 @@ export class WindowManager {
 
   private async loadApplication(window: BrowserWindow): Promise<void> {
     try {
-      if (isDev) {
-        // Development: load from Vite dev server
-        await window.loadURL('http://localhost:3000');
-      } else {
-        // Production: load from built files
-        const indexPath = path.join(__dirname, '../web/dist/index.html');
-        await window.loadFile(indexPath);
-      }
+      // Load embedded HTML file from dist/renderer directory
+      const indexPath = path.join(__dirname, 'renderer/index.html');
+      log.info('Loading embedded application from:', indexPath);
+      await window.loadFile(indexPath);
     } catch (error) {
       log.error('Failed to load application:', error);
       throw error;

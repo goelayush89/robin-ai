@@ -13,6 +13,7 @@
     "dev:desktop": "turbo run dev --filter=@robin/desktop",
     "build:web": "turbo run build --filter=@robin/web",
     "build:desktop": "turbo run build --filter=@robin/desktop",
+  "dist:desktop": "cd apps/desktop && npm run electron:dist",
     "build:ui": "turbo run build --filter=@robin/ui",
     "build:core": "turbo run build --filter=@robin/core",
     "build:ipc": "turbo run build --filter=@robin/ipc",

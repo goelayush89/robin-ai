@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robin Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+            background: #0f172a;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: #1e293b;
+            border-right: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0f172a;
+        }
+
+        .header {
+            padding: 24px;
+            border-bottom: 1px solid #334155;
+            background: #1e293b;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .status-section {
+            padding: 20px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .status-card {
+            background: #334155;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #475569;
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .status-title {
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-ready {
+            background: #10b981;
+            color: #ffffff;
+        }
+
+        .status-error {
+            background: #ef4444;
+            color: #ffffff;
+        }
+
+        .status-loading {
+            background: #3b82f6;
+            color: #ffffff;
+        }
+
+        #status-message {
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+
+        .message.user {
+            background: #3b82f6;
+            color: white;
+            margin-left: auto;
+        }
+
+        .message.assistant {
+            background: #334155;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+        }
+
+        .message.system {
+            background: #059669;
+            color: white;
+            text-align: center;
+            margin: 0 auto;
+            font-weight: 500;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #475569;
+            border-radius: 12px;
+            font-size: 14px;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .message-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .send-button {
+            padding: 12px 24px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            min-width: 80px;
+        }
+
+        .send-button:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        .send-button:disabled {
+            background: #64748b;
+            cursor: not-allowed;
+        }
+
+        .setup-section {
+            padding: 40px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .setup-card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid #334155;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .setup-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            color: white;
+            font-size: 32px;
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+        }
+
+        .setup-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 12px;
+        }
+
+        .setup-description {
+            color: #94a3b8;
+            margin-bottom: 32px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .setup-button {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+        }
+
+        .setup-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+        }
+
+        .setup-button:disabled {
+            background: #64748b;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff40;
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .screenshot-preview {
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .screenshot-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .settings-section {
+            padding: 20px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .settings-title {
+            color: #f1f5f9;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .settings-item {
+            margin-bottom: 16px;
+        }
+
+        .settings-label {
+            display: block;
+            font-weight: 500;
+            color: #e2e8f0;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .settings-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #334155;
+            color: #e2e8f0;
+            transition: border-color 0.2s;
+        }
+
+        .settings-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .settings-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .settings-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #334155;
+            color: #e2e8f0;
+            cursor: pointer;
+        }
+
+        .settings-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        /* Scrollbar styling */
+        .messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .setup-card {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Glow effects */
+        .setup-icon {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3); }
+            50% { box-shadow: 0 8px 32px rgba(59, 130, 246, 0.6); }
+        }
+
+        /* Status indicator animations */
+        .status-loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Hover effects */
+        .status-card:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+
+        .message:hover {
+            transform: translateX(4px);
+            transition: transform 0.2s ease;
+        }
+
+        /* API Test Button */
+        .test-button {
+            padding: 8px 16px;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            min-width: 60px;
+        }
+
+        .test-button:hover:not(:disabled) {
+            background: #047857;
+        }
+
+        .test-button:disabled {
+            background: #64748b;
+            cursor: not-allowed;
+        }
+
+        /* Refresh Button */
+        .refresh-button {
+            padding: 8px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .refresh-button:hover {
+            background: #2563eb;
+        }
+
+        /* API Test Status */
+        .api-test-status {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .api-test-status.success {
+            background: #10b981;
+            color: white;
+        }
+
+        .api-test-status.error {
+            background: #ef4444;
+            color: white;
+        }
+
+        .api-test-status.loading {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* Screen Selection */
+        .screen-selection {
+            text-align: center;
+        }
+
+        .screen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .screen-option {
+            background: #334155;
+            border: 2px solid #475569;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .screen-option:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .screen-option.selected {
+            border-color: #10b981;
+            background: #065f46;
+        }
+
+        .screen-preview {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .screen-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #475569;
+            border-radius: 8px;
+        }
+
+        .screen-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .screen-name {
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+
+        .screen-resolution {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .screen-type {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="header">
+                <h1>
+                    <span style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🤖</span>
+                    Robin Assistant
+                </h1>
+                <p>AI-Powered Desktop Automation</p>
+            </div>
+
+            <!-- Status Section -->
+            <div class="status-section">
+                <div class="status-card">
+                    <div class="status-header">
+                        <span class="status-title">🖥️ Screen Capture</span>
+                        <span id="status-badge" class="status-badge status-loading">Checking</span>
+                    </div>
+                    <div id="status-message">Initializing native desktop screen capture...</div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div class="settings-section">
+                <h3 class="settings-title">⚙️ AI Configuration</h3>
+
+                <div class="settings-item">
+                    <label class="settings-label">AI Provider</label>
+                    <select id="ai-provider" class="settings-select">
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic</option>
+                        <option value="openrouter">OpenRouter</option>
+                    </select>
+                </div>
+
+                <div class="settings-item">
+                    <label class="settings-label">API Key</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="password" id="ai-api-key" class="settings-input" placeholder="Enter your API key" style="flex: 1;">
+                        <button id="test-api-key" class="test-button">Test</button>
+                    </div>
+                    <div id="api-test-status" class="api-test-status" style="display: none;"></div>
+                </div>
+
+                <div class="settings-item">
+                    <label class="settings-label">Model</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <select id="ai-model" class="settings-select" style="flex: 1;">
+                            <option value="gpt-4-vision-preview">GPT-4 Vision Preview</option>
+                            <option value="gpt-4o">GPT-4o</option>
+                            <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+                        </select>
+                        <button id="refresh-models" class="refresh-button" style="display: none;" title="Refresh OpenRouter models">🔄</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Setup Screen -->
+            <div id="setup-screen" class="setup-section">
+                <div class="setup-card">
+                    <div class="setup-icon">📷</div>
+                    <h2 class="setup-title">Enable Native Desktop Screen Capture</h2>
+                    <p class="setup-description">
+                        Robin Assistant Desktop has native screen capture capabilities for full automation.
+                        No browser permissions needed - this is true desktop-level access.
+                    </p>
+                    <button id="enable-capture-btn" class="setup-button">
+                        <span id="setup-button-text">🚀 Enable Desktop Screen Capture</span>
+                    </button>
+                    <div id="screenshot-preview" class="screenshot-preview hidden"></div>
+                </div>
+            </div>
+
+            <!-- Chat Interface -->
+            <div id="chat-screen" class="chat-container hidden">
+                <div id="messages" class="messages">
+                    <div class="message system">
+                        🎉 Native desktop screen capture enabled! You can now give me instructions to automate your entire desktop.
+                    </div>
+                </div>
+
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <textarea
+                            id="message-input"
+                            class="message-input"
+                            placeholder="Tell me what you'd like me to do on your desktop..."
+                            rows="1"
+                        ></textarea>
+                    </div>
+                    <button id="send-button" class="send-button">
+                        <span>Send</span>
+                        <span style="margin-left: 8px;">🚀</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
